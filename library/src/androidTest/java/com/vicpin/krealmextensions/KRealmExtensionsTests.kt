@@ -2,11 +2,13 @@ package com.vicpin.krealmextensions
 
 import android.support.test.runner.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.vicpin.krealmextensions.model.TestEntity
-import com.vicpin.krealmextensions.model.TestEntityAutoPK
-import com.vicpin.krealmextensions.model.TestEntityPK
+import com.vicpin.krealmextensions.model.realmmodel.TestEntity as TestEntityRealmModel
+import com.vicpin.krealmextensions.model.realmobject.TestEntity as TestEntityRealmObject
+import com.vicpin.krealmextensions.model.realmobject.TestEntityAutoPK
+import com.vicpin.krealmextensions.model.realmobject.TestEntityPK
 import com.vicpin.krealmextensions.util.TestRealmConfigurationFactory
 import io.realm.Realm
+import io.realm.RealmObject
 import io.realm.Sort
 import io.realm.exceptions.RealmPrimaryKeyConstraintException
 import org.junit.After
@@ -36,9 +38,10 @@ class KRealmExtensionsTests {
     }
 
     @After fun tearDown() {
-        TestEntity().deleteAll()
+        TestEntityRealmObject().deleteAll()
         TestEntityPK().deleteAll()
         TestEntityAutoPK().deleteAll()
+        TestEntityRealmModel().deleteAll()
         realm.close()
         latchReleased = false
     }
@@ -47,12 +50,21 @@ class KRealmExtensionsTests {
      * PERSISTENCE TESTS
      */
     @Test fun testPersistEntityWithCreate() {
-        TestEntity().create() //No exception expected
+        TestEntityRealmObject().create() //No exception expected
     }
 
     @Test fun testPersistEntityWithCreateManaged() {
-        val result = TestEntity().createManaged(realm) //No exception expected
+        val result = TestEntityRealmObject().createManaged(realm) //No exception expected
         assertThat(result.isManaged).isTrue()
+    }
+
+    @Test fun testPersistRealmModelEntityWithCreate() {
+        TestEntityRealmModel().create() //No exception expected
+    }
+
+    @Test fun testPersistRealmModelEntityWithCreateManaged() {
+        val result = TestEntityRealmModel().createManaged(realm) //No exception expected
+        assertThat(RealmObject.isManaged(result)).isTrue()
     }
 
     @Test fun testPersistPKEntityWithCreate() {
@@ -66,12 +78,12 @@ class KRealmExtensionsTests {
 
     @Test(expected = IllegalArgumentException::class)
     fun testPersistEntityWithCreateOrUpdateMethod() {
-        TestEntity().createOrUpdate() //Exception expected due to TestEntity has no primary key
+        TestEntityRealmObject().createOrUpdate() //Exception expected due to TestEntity has no primary key
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testPersistEntityWithCreateOrUpdateMethodManaged() {
-        TestEntity().createOrUpdateManaged(realm) //Exception expected due to TestEntity has no primary key
+        TestEntityRealmObject().createOrUpdateManaged(realm) //Exception expected due to TestEntity has no primary key
     }
 
     fun testPersistPKEntityWithCreateOrUpdateMethod() {
@@ -84,13 +96,13 @@ class KRealmExtensionsTests {
     }
 
     @Test fun testPersistEntityWithSaveMethod() {
-        TestEntity().save() //No exception expected
+        TestEntityRealmObject().save() //No exception expected
     }
 
     @Test fun testPersistEntityWithSaveMethodManaged() {
-        val result = TestEntity().saveManaged(realm) //No exception expected
+        val result = TestEntityRealmObject().saveManaged(realm) //No exception expected
         assertThat(result.isManaged)
-        assertThat(TestEntity().count(realm)).isEqualTo(1)
+        assertThat(TestEntityRealmObject().count(realm)).isEqualTo(1)
     }
 
     @Test fun testPersistPKEntityWithSaveMethod() {
@@ -140,9 +152,9 @@ class KRealmExtensionsTests {
     }
 
     @Test fun testCountEntity() {
-        val list = listOf(TestEntity(), TestEntity(), TestEntity())
+        val list = listOf(TestEntityRealmObject(), TestEntityRealmObject(), TestEntityRealmObject())
         list.saveAll()
-        assertThat(TestEntity().count()).isEqualTo(3)
+        assertThat(TestEntityRealmObject().count()).isEqualTo(3)
     }
 
     /**
@@ -202,51 +214,51 @@ class KRealmExtensionsTests {
      * QUERY TESTS WITH EMPTY DB
      */
     @Test fun testQueryFirstObjectWithEmptyDBShouldReturnNull() {
-        assertThat(TestEntity().queryFirst()).isNull()
+        assertThat(TestEntityRealmObject().queryFirst()).isNull()
     }
 
     @Test fun testAsyncQueryFirstObjectWithEmptyDBShouldReturnNull() {
         block {
-            TestEntity().queryFirstAsync { assertThat(it).isNull();release() }
+            TestEntityRealmObject().queryFirstAsync { assertThat(it).isNull();release() }
         }
     }
 
     @Test fun testQueryLastObjectWithEmptyDBShouldReturnNull() {
-        assertThat(TestEntity().queryLast()).isNull()
+        assertThat(TestEntityRealmObject().queryLast()).isNull()
     }
 
     @Test fun testQueryLastObjectWithConditionAndEmptyDBShouldReturnNull() {
-        assertThat(TestEntity().queryLast { it.equalTo("name", "test") }).isNull()
+        assertThat(TestEntityRealmObject().queryLast { it.equalTo("name", "test") }).isNull()
     }
 
     @Test fun testAsyncQueryLastObjectWithEmptyDBShouldReturnNull() {
         block {
-            TestEntity().queryLastAsync { assertThat(it).isNull(); release() }
+            TestEntityRealmObject().queryLastAsync { assertThat(it).isNull(); release() }
         }
     }
 
     @Test fun testAllItemsShouldReturnEmptyCollectionWhenDBIsEmpty() {
-        assertThat(TestEntity().queryAll()).hasSize(0)
+        assertThat(TestEntityRealmObject().queryAll()).hasSize(0)
     }
 
     @Test fun testAllItemsAsyncShouldReturnEmptyCollectionWhenDBIsEmpty() {
         block {
-            TestEntity().queryAllAsync { assertThat(it).hasSize(0); release() }
+            TestEntityRealmObject().queryAllAsync { assertThat(it).hasSize(0); release() }
         }
     }
 
     @Test fun testQueryConditionalWhenDBIsEmpty() {
-        val result = TestEntity().query { it.equalTo("name", "test") }
+        val result = TestEntityRealmObject().query { it.equalTo("name", "test") }
         assertThat(result).hasSize(0)
     }
 
     @Test fun testQueryFirstItemWhenDBIsEmpty() {
-        val result = TestEntity().queryFirst { it.equalTo("name", "test") }
+        val result = TestEntityRealmObject().queryFirst { it.equalTo("name", "test") }
         assertThat(result).isNull()
     }
 
     @Test fun testQuerySortedWhenDBIsEmpty() {
-        val result = TestEntity().querySorted("name", Sort.ASCENDING) { it.equalTo("name", "test") }
+        val result = TestEntityRealmObject().querySorted("name", Sort.ASCENDING) { it.equalTo("name", "test") }
         assertThat(result).hasSize(0)
     }
 
@@ -294,14 +306,14 @@ class KRealmExtensionsTests {
 
     @Test fun testQueryAllItemsShouldReturnAllItemsWhenDBIsNotEmpty() {
         populateDBWithTestEntity(numItems = 5)
-        assertThat(TestEntity().queryAll()).hasSize(5)
+        assertThat(TestEntityRealmObject().queryAll()).hasSize(5)
     }
 
     @Test fun testAsyncQueryAllItemsShouldReturnAllItemsWhenDBIsNotEmpty() {
         populateDBWithTestEntity(numItems = 5)
 
         block {
-            TestEntity().queryAllAsync { assertThat(it).hasSize(5); release() }
+            TestEntityRealmObject().queryAllAsync { assertThat(it).hasSize(5); release() }
         }
     }
 
@@ -401,9 +413,9 @@ class KRealmExtensionsTests {
     @Test fun testDeleteEntities() {
         populateDBWithTestEntity(numItems = 5)
 
-        TestEntity().deleteAll()
+        TestEntityRealmObject().deleteAll()
 
-        assertThat(TestEntity().queryAll()).hasSize(0)
+        assertThat(TestEntityRealmObject().queryAll()).hasSize(0)
     }
 
     @Test fun testDeleteEntitiesWithPK() {
@@ -427,7 +439,7 @@ class KRealmExtensionsTests {
      * UTILITY TEST METHODS
      */
     private fun populateDBWithTestEntity(numItems: Int) {
-        (0..numItems - 1).forEach { TestEntity().save() }
+        (0..numItems - 1).forEach { TestEntityRealmObject().save() }
     }
 
     private fun populateDBWithTestEntityPK(numItems: Int) {

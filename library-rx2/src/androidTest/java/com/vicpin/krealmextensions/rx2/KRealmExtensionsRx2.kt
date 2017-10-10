@@ -3,8 +3,8 @@ package com.vicpin.krealmextensions.rx2
 import android.support.test.runner.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.vicpin.krealmextensions.deleteAll
-import com.vicpin.krealmextensions.model.TestEntity
-import com.vicpin.krealmextensions.model.TestEntityPK
+import com.vicpin.krealmextensions.model.realmobject.TestEntity
+import com.vicpin.krealmextensions.model.realmobject.TestEntityPK
 import com.vicpin.krealmextensions.save
 import com.vicpin.krealmextensions.util.TestRealmConfigurationFactory
 import io.reactivex.disposables.Disposable

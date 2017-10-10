@@ -1,4 +1,4 @@
-package com.vicpin.krealmextensions.model
+package com.vicpin.krealmextensions.model.realmobject
 
 import io.realm.RealmObject
 
